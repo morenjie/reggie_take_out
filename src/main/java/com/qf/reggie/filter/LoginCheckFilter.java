@@ -1,6 +1,7 @@
 package com.qf.reggie.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.qf.reggie.common.BaseContext;
 import com.qf.reggie.common.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
@@ -26,7 +27,7 @@ public class LoginCheckFilter implements Filter {
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         //1.获取本次请求的URL
         String requestURI = httpServletRequest.getRequestURI();
-        log.info("拦截到请求：{}",requestURI);
+        log.info("拦截到请求：{}", requestURI);
         //不需要处理的请求路径
         String[] urls = new String[]{
                 "/employee/login",
@@ -38,13 +39,15 @@ public class LoginCheckFilter implements Filter {
         boolean check = check(urls, requestURI);
         //3.如果不需要处理，则直接放行
         if (check) {
-            log.info("本次请求{}不需要处理",requestURI);
+            log.info("本次请求{}不需要处理", requestURI);
             chain.doFilter(request, response);
             return;
         }
         //4.判断登录状态，如果已经登录，则直接放行
         if (httpServletRequest.getSession().getAttribute("employee") != null) {
-            log.info("用户已登录，用户id为:{}",httpServletRequest.getSession().getAttribute("employee"));
+            log.info("用户已登录，用户id为:{}", httpServletRequest.getSession().getAttribute("employee"));
+            Long empId = (Long) httpServletRequest.getSession().getAttribute("employee");
+            BaseContext.setCurrentId(empId);
             chain.doFilter(request, response);
             return;
         }
